@@ -25,6 +25,7 @@ export class Rendertron {
   config: Config = {datastoreCache: false};
   private renderer: Renderer|undefined;
   private port = process.env.PORT || '3000';
+  private width_d = Number(process.env.WIDTH || 1000);
 
   async initialize() {
     // Load config.json if it exists.
@@ -32,7 +33,7 @@ export class Rendertron {
       this.config = Object.assign(this.config, await fse.readJson(CONFIG_PATH));
     }
 
-    const browser = await puppeteer.launch({args: ['--no-sandbox']});
+    const browser = await puppeteer.launch({args: ['--no-sandbox'], ignoreHTTPSErrors: true });
     this.renderer = new Renderer(browser);
 
     this.app.use(koaCompress());
@@ -108,8 +109,8 @@ export class Rendertron {
     }
 
     const dimensions = {
-      width: Number(ctx.query['width']) || 1000,
-      height: Number(ctx.query['height']) || 1000
+      width: Number(ctx.query['width']) || this.width_d,
+      height: Number(ctx.query['height']) || 0
     };
 
     const mobileVersion = 'mobile' in ctx.query ? true : false;

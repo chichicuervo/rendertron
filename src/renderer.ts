@@ -18,10 +18,13 @@ const MOBILE_USERAGENT =
  */
 export class Renderer {
   private browser: puppeteer.Browser;
+  private height_d = Number(process.env.HEIGHT || 1000);
+  private width_d = Number(process.env.WIDTH || 1000);
+  private timeout_d = Number(process.env.TIMEOUT || 10000);
 
   constructor(browser: puppeteer.Browser) {
     this.browser = browser;
-  }
+}
 
   async serialize(requestUrl: string, isMobile: boolean):
       Promise<SerializedResponse> {
@@ -60,7 +63,7 @@ export class Renderer {
 
     const page = await this.browser.newPage();
 
-    page.setViewport({width: 1000, height: 1000, isMobile});
+    page.setViewport({width: this.width_d, height: this.height_d, isMobile});
 
     if (isMobile) {
       page.setUserAgent(MOBILE_USERAGENT);
@@ -84,7 +87,7 @@ export class Renderer {
     try {
       // Navigate to page. Wait until there are no oustanding network requests.
       response = await page.goto(
-          requestUrl, {timeout: 10000, waitUntil: 'networkidle0'});
+          requestUrl, {timeout: this.timeout_d, waitUntil: 'networkidle0'});
     } catch (e) {
       console.error(e);
     }
@@ -138,18 +141,27 @@ export class Renderer {
       options?: object): Promise<Buffer> {
     const page = await this.browser.newPage();
 
+    let height = dimensions.height || this.height_d;
+
     page.setViewport(
-        {width: dimensions.width, height: dimensions.height, isMobile});
+        {width: dimensions.width, height: height, isMobile});
 
     if (isMobile) {
       page.setUserAgent(MOBILE_USERAGENT);
     }
 
-    await page.goto(url, {timeout: 10000, waitUntil: 'networkidle0'});
+    await page.goto(url, {timeout: this.timeout_d, waitUntil: 'networkidle0'});
+
+    if (!dimensions.height) {
+        let pgLength = await page.evaluate('document.body.scrollHeight');
+
+        page.setViewport(
+            {width: dimensions.width, height: pgLength, isMobile});
+    }
 
     // Must be jpeg & binary format.
     const screenshotOptions =
-        Object.assign({}, options, {type: 'jpeg', encoding: 'binary'});
+        Object.assign({}, options, {type: 'jpeg', encoding: 'binary', fullpage: true});
     const buffer = await page.screenshot(screenshotOptions);
     return buffer;
   }
