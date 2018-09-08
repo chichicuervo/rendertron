@@ -31,6 +31,8 @@ RUN apt-get update && \
 
 WORKDIR /app
 
+EXPOSE 3000/tcp
+
 RUN npm install || \
   ((if [ -f npm-debug.log ]; then \
       cat npm-debug.log; \
