@@ -163,6 +163,8 @@ export class Renderer {
     const screenshotOptions =
         Object.assign({}, options, {type: 'jpeg', encoding: 'binary', fullpage: true});
     const buffer = await page.screenshot(screenshotOptions);
-    return buffer;
+    if (buffer instanceof Buffer)
+        return buffer;
+    return Buffer.from('');
   }
 }
