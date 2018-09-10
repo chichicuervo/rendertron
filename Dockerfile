@@ -4,8 +4,6 @@ FROM ubuntu:18.04
 LABEL name="jasontron" \
       version="0.1"
 
-COPY . /app
-
 RUN apt-get update && \
     apt-get -y install xvfb gconf-service libasound2 libatk1.0-0 libc6 libcairo2 libcups2 \
       libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 \
@@ -15,7 +13,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && \
-    apt-get -yq install nodejs npm
+    apt-get -yq install nodejs npm dumb-init
 
 # RUN apt-get update && apt-get install -y \
 #  wget \
@@ -29,16 +27,20 @@ RUN apt-get update && \
 #
 # ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 
-WORKDIR /app
+COPY . /app
 
-EXPOSE 3000/tcp
+WORKDIR /app
 
 RUN npm install || \
   ((if [ -f npm-debug.log ]; then \
       cat npm-debug.log; \
     fi) && false)
 
+ENV TIMEOUT 60000
+
+EXPOSE 3000
+
 RUN npm run build
 
-ENTRYPOINT [ "npm" ]
-CMD ["run", "start"]
+ENTRYPOINT [ "dumb-init" , "--"]
+CMD ["npm", "run", "start"]

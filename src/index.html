@@ -179,37 +179,12 @@ the License.
       <i class="material-icons">photo_camera</i>
       <span>Take screenshot</span>
     </button>
-    <button onclick="render(this, false)">
-      <i class="material-icons">cloud_upload</i>
-      <span>Render &amp; serialize</span>
-    </button>
-    <button onclick="render(this, true)">
-      <i class="material-icons">mobile_friendly</i>
-      <span>Render as mobile &amp; serialize</span>
-    </button>
-    <a href="https://github.com/GoogleChrome/rendertron" target="_blank">
-      <button tabindex="-1">
-        <i class="material-icons">insert_drive_file</i>
-        <span>View documentation</span>
-      </button>
-    </a>
   </div>
 
   <script>
     function encodeUrl(fullUrl) {
       var url = new URL(fullUrl);
       return url.origin + url.pathname + encodeURIComponent(url.search) + encodeURIComponent(url.hash);
-    }
-
-    function render(element, isMobile) {
-      if (!url.value) {
-        onEmptyUrl();
-        return;
-      }
-
-      element.classList.add('loading');
-      document.querySelector('progress-bar').removeAttribute('hidden');
-      window.location.href += `render/${encodeUrl(url.value)}${isMobile ? '?mobile' : ''}`;
     }
 
     function takeScreenshot(element) {
